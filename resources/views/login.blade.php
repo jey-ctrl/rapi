@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -161,8 +160,17 @@
 
         {{-- Pesan error --}}
         @if ($errors->any())
-            <div class="alert alert-error">
-                {{ $errors->first() }}
+            <div class="alert alert-error" role="alert">
+                @foreach ($errors->all() as $error)
+                    <p>{{ $error }}</p>
+                @endforeach
+            </div>
+        @endif
+
+        {{-- Pesan peringatan --}}
+        @if (session('warning'))
+            <div class="alert alert-error" role="alert">
+                {{ session('warning') }}
             </div>
         @endif
 

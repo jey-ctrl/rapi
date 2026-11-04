@@ -8,10 +8,9 @@ use App\Http\Controllers\Controller;
 
 class AuthController extends Controller
 {
-    // Method ini yang dipanggil oleh Route::get('/login')
     public function showLoginForm()
     {
-        return view('login'); // Memanggil resources/views/login.blade.php
+        return view('login');
     }
 
     public function login(Request $request)
@@ -19,6 +18,9 @@ class AuthController extends Controller
         $credentials = $request->validate([
             'username' => 'required|string',
             'password' => 'required|string',
+        ], [
+            'username.required' => 'Username wajib diisi.',
+            'password.required' => 'Password wajib diisi.',
         ]);
 
         if (Auth::attempt($credentials)) {
@@ -26,17 +28,27 @@ class AuthController extends Controller
 
             $roleId = Auth::user()->role_id;
 
-            // Redirect ke dashboard sesuai role_id
-            return match ((int)$roleId) {
+            if (!$roleId) {
+                Auth::logout();
+
+                return back()->withErrors([
+                    'username' => 'Akun belum memiliki role. Silakan hubungi administrator.',
+                ]);
+            }
+
+            return match ((int) $roleId) {
                 1 => redirect()->route('admin.dashboard'),
                 2 => redirect()->route('pic.dashboard'),
                 3 => redirect()->route('guru.dashboard'),
-                default => redirect('/calendar'),
+                default => redirect('/calendar')->with(
+                    'warning',
+                    'Role akun tidak dikenali.'
+                ),
             };
         }
 
         return back()->withErrors([
-            'username' => 'Username atau password yang dimasukkan salah.',
+            'username' => 'Login gagal. Username atau password salah.',
         ])->onlyInput('username');
     }
 
