@@ -1,4 +1,3 @@
-
 <?php
 
 use Illuminate\Support\Facades\Route;
@@ -14,7 +13,6 @@ use App\Http\Controllers\CalendarController;
 
 // =====================================================
 // HALAMAN UTAMA
-// Kalender publik menjadi halaman pertama
 // =====================================================
 
 Route::get('/', function () {
@@ -49,21 +47,17 @@ Route::get('/calendar/events', [CalendarController::class, 'events'])
 
 Route::middleware(['auth'])->group(function () {
 
-    // Form pengajuan peminjaman untuk Guru/Organisasi
     Route::get('/booking', [EventsController::class, 'create'])
         ->middleware('role:3')
         ->name('booking.index');
 
-    // Menyimpan pengajuan peminjaman
     Route::post('/events', [EventsController::class, 'store'])
         ->middleware('role:3')
         ->name('events.store');
 
-    // Daftar pengaduan
     Route::get('/complaints', [ComplaintController::class, 'index'])
         ->name('complaints.index');
 
-    // Menyimpan pengaduan
     Route::post('/complaints', [ComplaintController::class, 'store'])
         ->name('complaints.store');
 });
@@ -76,61 +70,38 @@ Route::middleware(['auth', 'role:1'])
     ->prefix('admin')
     ->group(function () {
 
-        // Dashboard Admin/Waka
         Route::get('/dashboard', [AdminController::class, 'index'])
             ->name('admin.dashboard');
 
-        // -------------------------------------------------
-        // PERSETUJUAN PEMINJAMAN
-        // -------------------------------------------------
-
-        // Menyetujui pengajuan
         Route::put('/events/{id}/approve', [
             EventsController::class,
             'approve'
         ])->name('admin.events.approve');
 
-        // Menolak pengajuan
         Route::put('/events/{id}/reject', [
             EventsController::class,
             'reject'
         ])->name('admin.events.reject');
 
-        // -------------------------------------------------
-        // PEMINDAHAN RUANGAN
-        // -------------------------------------------------
-
-        // Menampilkan agenda untuk pengelolaan pemindahan
         Route::get('/pemindahan-ruang', [
             EventsController::class,
             'manageOverride'
         ])->name('admin.events.manage');
 
-        // Form pemindahan ruangan
         Route::get('/events/{id}/move', [
             EventsController::class,
             'moveForm'
         ])->name('admin.events.move.form');
 
-        // Menyimpan perubahan ruangan
         Route::put('/events/{id}/override', [
             EventsController::class,
             'overrideRoom'
         ])->name('admin.events.override');
 
-        // -------------------------------------------------
-        // PENGADUAN
-        // -------------------------------------------------
-
-        // Mengirim peringatan WhatsApp
         Route::get('/complaints/{id}/warn', [
             ComplaintController::class,
             'sendWaWarning'
         ])->name('admin.complaints.warn');
-
-        // -------------------------------------------------
-        // KELOLA RUANGAN
-        // -------------------------------------------------
 
         Route::get('/rooms', [
             AdminController::class,
@@ -151,10 +122,6 @@ Route::middleware(['auth', 'role:1'])
             RoomController::class,
             'destroy'
         ])->name('rooms.destroy');
-
-        // -------------------------------------------------
-        // KELOLA PENGGUNA
-        // -------------------------------------------------
 
         Route::get('/users', [
             UserController::class,
@@ -185,11 +152,9 @@ Route::middleware(['auth', 'role:2'])
     ->prefix('pic')
     ->group(function () {
 
-        // Dashboard PIC
         Route::get('/dashboard', [PicController::class, 'index'])
             ->name('pic.dashboard');
 
-        // Memperbarui status pengaduan
         Route::put('/complaints/{id}/status', [
             ComplaintController::class,
             'updateStatus'
@@ -204,7 +169,26 @@ Route::middleware(['auth', 'role:3'])
     ->prefix('guru')
     ->group(function () {
 
-        // Dashboard Guru/Organisasi
         Route::get('/dashboard', [GuruController::class, 'index'])
             ->name('guru.dashboard');
     });
+
+// =====================================================
+// TEMPORARY COOKIE TEST
+// HAPUS SETELAH PENGUJIAN SELESAI
+// =====================================================
+
+Route::get('/cookie-probe-laravel', function () {
+    return response('Laravel cookie test berhasil')
+        ->cookie(
+            'laravel_probe',
+            'success',
+            5,
+            '/',
+            null,
+            true,
+            true,
+            false,
+            'lax'
+        );
+});
