@@ -47,17 +47,21 @@ Route::get('/calendar/events', [CalendarController::class, 'events'])
 
 Route::middleware(['auth'])->group(function () {
 
+    // Form pengajuan peminjaman untuk Guru/Organisasi
     Route::get('/booking', [EventsController::class, 'create'])
         ->middleware('role:3')
         ->name('booking.index');
 
+    // Menyimpan pengajuan peminjaman
     Route::post('/events', [EventsController::class, 'store'])
         ->middleware('role:3')
         ->name('events.store');
 
+    // Daftar pengaduan
     Route::get('/complaints', [ComplaintController::class, 'index'])
         ->name('complaints.index');
 
+    // Menyimpan pengaduan
     Route::post('/complaints', [ComplaintController::class, 'store'])
         ->name('complaints.store');
 });
@@ -70,9 +74,11 @@ Route::middleware(['auth', 'role:1'])
     ->prefix('admin')
     ->group(function () {
 
+        // Dashboard Admin/Waka
         Route::get('/dashboard', [AdminController::class, 'index'])
             ->name('admin.dashboard');
 
+        // Persetujuan peminjaman
         Route::put('/events/{id}/approve', [
             EventsController::class,
             'approve'
@@ -83,6 +89,7 @@ Route::middleware(['auth', 'role:1'])
             'reject'
         ])->name('admin.events.reject');
 
+        // Pemindahan ruangan
         Route::get('/pemindahan-ruang', [
             EventsController::class,
             'manageOverride'
@@ -98,11 +105,13 @@ Route::middleware(['auth', 'role:1'])
             'overrideRoom'
         ])->name('admin.events.override');
 
+        // Pengaduan
         Route::get('/complaints/{id}/warn', [
             ComplaintController::class,
             'sendWaWarning'
         ])->name('admin.complaints.warn');
 
+        // Kelola ruangan
         Route::get('/rooms', [
             AdminController::class,
             'manageRooms'
@@ -123,6 +132,7 @@ Route::middleware(['auth', 'role:1'])
             'destroy'
         ])->name('rooms.destroy');
 
+        // Kelola pengguna
         Route::get('/users', [
             UserController::class,
             'index'
@@ -152,9 +162,11 @@ Route::middleware(['auth', 'role:2'])
     ->prefix('pic')
     ->group(function () {
 
+        // Dashboard PIC
         Route::get('/dashboard', [PicController::class, 'index'])
             ->name('pic.dashboard');
 
+        // Memperbarui status pengaduan
         Route::put('/complaints/{id}/status', [
             ComplaintController::class,
             'updateStatus'
@@ -169,26 +181,7 @@ Route::middleware(['auth', 'role:3'])
     ->prefix('guru')
     ->group(function () {
 
+        // Dashboard Guru
         Route::get('/dashboard', [GuruController::class, 'index'])
             ->name('guru.dashboard');
     });
-
-// =====================================================
-// TEMPORARY COOKIE TEST
-// HAPUS SETELAH PENGUJIAN SELESAI
-// =====================================================
-
-Route::get('/cookie-probe-laravel', function () {
-    return response('Laravel cookie test berhasil')
-        ->cookie(
-            'laravel_probe',
-            'success',
-            5,
-            '/',
-            null,
-            true,
-            true,
-            false,
-            'lax'
-        );
-});
