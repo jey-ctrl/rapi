@@ -34,30 +34,18 @@ class RoomController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'room_name' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-            'location' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-            'capacity' => [
-                'required',
-                'integer',
-                'min:1',
-            ],
+            'room_name' => 'required|string|max:255',
+            'location' => 'required|string|max:255',
+            'capacity' => 'required|integer|min:1',
             'pic_id' => [
-                'nullable',
+                'required',
                 'integer',
                 Rule::exists('users', 'id')
                     ->where('role_id', 2),
             ],
             'is_active' => [
                 'required',
-                'boolean',
+                Rule::in(['Aktif', 'Nonaktif']),
             ],
         ]);
 
@@ -76,30 +64,18 @@ class RoomController extends Controller
         $room = Room::findOrFail($id);
 
         $validated = $request->validate([
-            'room_name' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-            'location' => [
-                'required',
-                'string',
-                'max:255',
-            ],
-            'capacity' => [
-                'required',
-                'integer',
-                'min:1',
-            ],
+            'room_name' => 'required|string|max:255',
+            'location' => 'required|string|max:255',
+            'capacity' => 'required|integer|min:1',
             'pic_id' => [
-                'nullable',
+                'required',
                 'integer',
                 Rule::exists('users', 'id')
                     ->where('role_id', 2),
             ],
             'is_active' => [
                 'required',
-                'boolean',
+                Rule::in(['Aktif', 'Nonaktif']),
             ],
         ]);
 
@@ -116,6 +92,17 @@ class RoomController extends Controller
     public function destroy($id)
     {
         $room = Room::findOrFail($id);
+
+        // Mencegah penghapusan jika masih memiliki agenda
+        // atau laporan kerusakan agar data terkait tidak hilang.
+        if ($room->events()->exists() || $room->complaints()->exists()) {
+            return redirect()
+                ->route('admin.dashboard')
+                ->with(
+                    'error',
+                    'Ruangan tidak dapat dihapus karena masih memiliki riwayat peminjaman atau laporan kerusakan. Ubah status ruangan menjadi Nonaktif.'
+                );
+        }
 
         $room->delete();
 

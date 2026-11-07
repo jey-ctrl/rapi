@@ -1,3 +1,9 @@
+@extends('layouts.app')
+
+@section('title', 'Data Ruangan')
+@section('page-title', 'Data Ruangan')
+
+@section('content')
 {{-- resources/views/admin/data_ruang.blade.php --}}
 
 <div class="rooms-page">
@@ -12,34 +18,34 @@
         </div>
 
         <button type="button"
-                class="rooms-button rooms-button-primary"
-                data-rooms-open="rooms-add-modal">
+            class="rooms-button rooms-button-primary"
+            data-rooms-open="rooms-add-modal">
             + Tambah Ruang
         </button>
     </div>
 
     {{-- NOTIFIKASI --}}
     @if (session('success'))
-        <div class="rooms-alert rooms-alert-success">
-            {{ session('success') }}
-        </div>
+    <div class="rooms-alert rooms-alert-success">
+        {{ session('success') }}
+    </div>
     @endif
 
     @if (session('error'))
-        <div class="rooms-alert rooms-alert-error">
-            {{ session('error') }}
-        </div>
+    <div class="rooms-alert rooms-alert-error">
+        {{ session('error') }}
+    </div>
     @endif
 
     @if ($errors->any())
-        <div class="rooms-alert rooms-alert-error">
-            <strong>Data gagal disimpan:</strong>
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
+    <div class="rooms-alert rooms-alert-error">
+        <strong>Data gagal disimpan:</strong>
+        <ul>
+            @foreach ($errors->all() as $error)
+            <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
     @endif
 
     {{-- RINGKASAN --}}
@@ -55,14 +61,14 @@
         <div class="rooms-summary-card">
             <span class="rooms-summary-label">Ruangan Aktif</span>
             <strong class="rooms-summary-value">
-                {{ $rooms->where('is_active', 1)->count() }}
+                {{ $rooms->where('is_active', 'Aktif')->count() }}
             </strong>
         </div>
 
         <div class="rooms-summary-card">
             <span class="rooms-summary-label">Ruangan Tidak Aktif</span>
             <strong class="rooms-summary-value">
-                {{ $rooms->where('is_active', 0)->count() }}
+                {{ $rooms->where('is_active', 'Nonaktif')->count() }}
             </strong>
         </div>
 
@@ -86,9 +92,9 @@
 
             <div class="rooms-search">
                 <input type="text"
-                       id="rooms-search-input"
-                       placeholder="Cari nama, lokasi, atau PIC..."
-                       autocomplete="off">
+                    id="rooms-search-input"
+                    placeholder="Cari nama, lokasi, atau PIC..."
+                    autocomplete="off">
             </div>
         </div>
 
@@ -110,87 +116,87 @@
                 <tbody id="rooms-table-body">
 
                     @forelse ($rooms as $room)
-                        <tr class="rooms-table-row">
+                    <tr class="rooms-table-row">
 
-                            <td>
-                                {{ $loop->iteration }}
-                            </td>
+                        <td>
+                            {{ $loop->iteration }}
+                        </td>
 
-                            <td>
-                                <div class="rooms-name">
-                                    {{ $room->room_name }}
-                                </div>
+                        <td>
+                            <div class="rooms-name">
+                                {{ $room->room_name }}
+                            </div>
 
-                                <small class="rooms-id">
-                                    ID: #{{ $room->id }}
-                                </small>
-                            </td>
+                            <small class="rooms-id">
+                                ID: #{{ $room->id }}
+                            </small>
+                        </td>
 
-                            <td>
-                                {{ $room->location ?: '-' }}
-                            </td>
+                        <td>
+                            {{ $room->location ?: '-' }}
+                        </td>
 
-                            <td>
-                                {{ $room->capacity }} orang
-                            </td>
+                        <td>
+                            {{ $room->capacity }} orang
+                        </td>
 
-                            <td>
-                                @if ($room->pic)
-                                    <span class="rooms-pic">
-                                        {{ $room->pic->fullname
+                        <td>
+                            @if ($room->pic)
+                            <span class="rooms-pic">
+                                {{ $room->pic->fullname
                                             ?? $room->pic->username
                                             ?? 'Nama tidak tersedia' }}
-                                    </span>
-                                @else
-                                    <span class="rooms-muted">
-                                        Belum ada PIC
-                                    </span>
-                                @endif
-                            </td>
+                            </span>
+                            @else
+                            <span class="rooms-muted">
+                                Belum ada PIC
+                            </span>
+                            @endif
+                        </td>
 
-                            <td>
-                                @if ($room->is_active)
-                                    <span class="rooms-status rooms-status-active">
-                                        Aktif
-                                    </span>
-                                @else
-                                    <span class="rooms-status rooms-status-inactive">
-                                        Tidak Aktif
-                                    </span>
-                                @endif
-                            </td>
+                        <td>
+                          @if ($room->is_active === 'Aktif')
+                            <span class="rooms-status rooms-status-active">
+                                Aktif
+                            </span>
+                            @else
+                            <span class="rooms-status rooms-status-inactive">
+                                Tidak Aktif
+                            </span>
+                            @endif
+                        </td>
 
-                            <td>
-                                <div class="rooms-actions">
+                        <td>
+                            <div class="rooms-actions">
 
-                                    {{-- EDIT --}}
-                                    <button type="button"
-                                            class="rooms-button rooms-button-edit"
-                                            data-rooms-open="rooms-edit-modal-{{ $room->id }}">
-                                        Edit
-                                    </button>
+                                {{-- EDIT --}}
+                                <button type="button"
+                                    class="rooms-button rooms-button-edit"
+                                    data-rooms-open="rooms-edit-modal-{{ $room->id }}">
+                                    Edit
+                                </button>
 
-                                    {{-- HAPUS --}}
-                                    <button type="button"
-                                            class="rooms-button rooms-button-delete"
-                                            data-rooms-open="rooms-delete-modal-{{ $room->id }}">
-                                        Hapus
-                                    </button>
+                                {{-- HAPUS --}}
+                                <button type="button"
+                                    class="rooms-button rooms-button-delete"
+                                    data-rooms-open="rooms-delete-modal-{{ $room->id }}">
+                                    Hapus
+                                </button>
 
-                                </div>
-                            </td>
+                            </div>
+                        </td>
 
-                        </tr>
+                    </tr>
                     @empty
-                        <tr>
-                            <td colspan="7" class="rooms-empty">
-                                <strong>Belum ada data ruangan.</strong>
-                                <p>
-                                    Klik tombol Tambah Ruang untuk menambahkan
-                                    ruangan baru.
-                                </p>
-                            </td>
-                        </tr>
+                    <tr>
+                        <td colspan="7" class="rooms-empty">
+                            <strong>Belum ada data ruangan.</strong>
+                            <p>
+                                Klik tombol Tambah Ruang untuk menambahkan
+                                ruangan baru.
+                            </p>
+                        </td>
+                    </tr>
                     @endforelse
 
                     <tr id="rooms-no-search-result" style="display: none;">
@@ -216,8 +222,8 @@
 {{-- ====================================================== --}}
 
 <div class="rooms-modal"
-     id="rooms-add-modal"
-     aria-hidden="true">
+    id="rooms-add-modal"
+    aria-hidden="true">
 
     <div class="rooms-modal-dialog">
 
@@ -228,9 +234,9 @@
             </div>
 
             <button type="button"
-                    class="rooms-modal-close"
-                    data-rooms-close
-                    aria-label="Tutup">
+                class="rooms-modal-close"
+                data-rooms-close
+                aria-label="Tutup">
                 &times;
             </button>
         </div>
@@ -246,12 +252,12 @@
                     </label>
 
                     <input type="text"
-                           id="add-room-name"
-                           name="room_name"
-                           maxlength="255"
-                           value="{{ old('room_name') }}"
-                           placeholder="Contoh: Laboratorium RPL"
-                           required>
+                        id="add-room-name"
+                        name="room_name"
+                        maxlength="255"
+                        value="{{ old('room_name') }}"
+                        placeholder="Contoh: Laboratorium RPL"
+                        required>
                 </div>
 
                 <div class="rooms-form-group">
@@ -260,12 +266,12 @@
                     </label>
 
                     <input type="text"
-                           id="add-room-location"
-                           name="location"
-                           maxlength="255"
-                           value="{{ old('location') }}"
-                           placeholder="Contoh: Gedung A lantai 2"
-                           required>
+                        id="add-room-location"
+                        name="location"
+                        maxlength="255"
+                        value="{{ old('location') }}"
+                        placeholder="Contoh: Gedung A lantai 2"
+                        required>
                 </div>
 
                 <div class="rooms-form-group">
@@ -274,12 +280,12 @@
                     </label>
 
                     <input type="number"
-                           id="add-room-capacity"
-                           name="capacity"
-                           min="1"
-                           value="{{ old('capacity', 30) }}"
-                           placeholder="Jumlah orang"
-                           required>
+                        id="add-room-capacity"
+                        name="capacity"
+                        min="1"
+                        value="{{ old('capacity', 30) }}"
+                        placeholder="Jumlah orang"
+                        required>
                 </div>
 
                 <div class="rooms-form-group">
@@ -287,23 +293,22 @@
                         PIC Ruangan
                     </label>
 
-                    <select name="pic_id" id="add-room-pic">
-                        <option value="">Belum ditentukan</option>
+                    <select name="pic_id" id="add-room-pic" required>
 
                         @foreach ($picUsers as $pic)
-                            <option value="{{ $pic->id }}"
-                                @selected(old('pic_id') == $pic->id)>
+                        <option value="{{ $pic->id }}"
+                            @selected(old('pic_id')==$pic->id)>
 
-                                {{ $pic->fullname
+                            {{ $pic->fullname
                                     ?? $pic->username
                                     ?? $pic->email }}
 
-                            </option>
+                        </option>
                         @endforeach
                     </select>
                 </div>
 
-                <input type="hidden" name="is_active" value="1">
+                <input type="hidden" name="is_active" value="Aktif">
 
                 <p class="rooms-form-note">
                     Ruangan baru akan dibuat dengan status Aktif.
@@ -314,13 +319,13 @@
 
             <div class="rooms-modal-footer">
                 <button type="button"
-                        class="rooms-button rooms-button-secondary"
-                        data-rooms-close>
+                    class="rooms-button rooms-button-secondary"
+                    data-rooms-close>
                     Batal
                 </button>
 
                 <button type="submit"
-                        class="rooms-button rooms-button-primary">
+                    class="rooms-button rooms-button-primary">
                     Simpan Ruangan
                 </button>
             </div>
@@ -337,229 +342,230 @@
 
 @foreach ($rooms as $room)
 
-    <div class="rooms-modal"
-         id="rooms-edit-modal-{{ $room->id }}"
-         aria-hidden="true">
+<div class="rooms-modal"
+    id="rooms-edit-modal-{{ $room->id }}"
+    aria-hidden="true">
 
-        <div class="rooms-modal-dialog">
+    <div class="rooms-modal-dialog">
 
-            <div class="rooms-modal-header">
-                <div>
-                    <h3>Edit Ruangan</h3>
-                    <p>Perbarui informasi ruangan.</p>
-                </div>
-
-                <button type="button"
-                        class="rooms-modal-close"
-                        data-rooms-close
-                        aria-label="Tutup">
-                    &times;
-                </button>
+        <div class="rooms-modal-header">
+            <div>
+                <h3>Edit Ruangan</h3>
+                <p>Perbarui informasi ruangan.</p>
             </div>
 
-            <form action="{{ route('rooms.update', $room->id) }}"
-                  method="POST">
+            <button type="button"
+                class="rooms-modal-close"
+                data-rooms-close
+                aria-label="Tutup">
+                &times;
+            </button>
+        </div>
 
-                @csrf
-                @method('PUT')
+        <form action="{{ route('rooms.update', $room->id) }}"
+            method="POST">
 
-                <input type="hidden"
-                       name="edit_room_id"
-                       value="{{ $room->id }}">
+            @csrf
+            @method('PUT')
 
-                <div class="rooms-modal-body">
+            <input type="hidden"
+                name="edit_room_id"
+                value="{{ $room->id }}">
 
-                    <div class="rooms-form-group">
-                        <label for="edit-room-name-{{ $room->id }}">
-                            Nama Ruangan <span>*</span>
-                        </label>
+            <div class="rooms-modal-body">
 
-                        <input type="text"
-                               id="edit-room-name-{{ $room->id }}"
-                               name="room_name"
-                               maxlength="255"
-                               value="{{ old('edit_room_id') == $room->id
+                <div class="rooms-form-group">
+                    <label for="edit-room-name-{{ $room->id }}">
+                        Nama Ruangan <span>*</span>
+                    </label>
+
+                    <input type="text"
+                        id="edit-room-name-{{ $room->id }}"
+                        name="room_name"
+                        maxlength="255"
+                        value="{{ old('edit_room_id') == $room->id
                                     ? old('room_name')
                                     : $room->room_name }}"
-                               required>
-                    </div>
+                        required>
+                </div>
 
-                    <div class="rooms-form-group">
-                        <label for="edit-room-location-{{ $room->id }}">
-                            Lokasi / Keterangan <span>*</span>
-                        </label>
+                <div class="rooms-form-group">
+                    <label for="edit-room-location-{{ $room->id }}">
+                        Lokasi / Keterangan <span>*</span>
+                    </label>
 
-                        <input type="text"
-                               id="edit-room-location-{{ $room->id }}"
-                               name="location"
-                               maxlength="255"
-                               value="{{ old('edit_room_id') == $room->id
+                    <input type="text"
+                        id="edit-room-location-{{ $room->id }}"
+                        name="location"
+                        maxlength="255"
+                        value="{{ old('edit_room_id') == $room->id
                                     ? old('location')
                                     : $room->location }}"
-                               required>
-                    </div>
+                        required>
+                </div>
 
-                    <div class="rooms-form-group">
-                        <label for="edit-room-capacity-{{ $room->id }}">
-                            Kapasitas <span>*</span>
-                        </label>
+                <div class="rooms-form-group">
+                    <label for="edit-room-capacity-{{ $room->id }}">
+                        Kapasitas <span>*</span>
+                    </label>
 
-                        <input type="number"
-                               id="edit-room-capacity-{{ $room->id }}"
-                               name="capacity"
-                               min="1"
-                               value="{{ old('edit_room_id') == $room->id
+                    <input type="number"
+                        id="edit-room-capacity-{{ $room->id }}"
+                        name="capacity"
+                        min="1"
+                        value="{{ old('edit_room_id') == $room->id
                                     ? old('capacity')
                                     : $room->capacity }}"
-                               required>
-                    </div>
+                        required>
+                </div>
 
-                    <div class="rooms-form-group">
-                        <label for="edit-room-pic-{{ $room->id }}">
-                            PIC Ruangan
-                        </label>
+                <div class="rooms-form-group">
+                    <label for="edit-room-pic-{{ $room->id }}">
+                        PIC Ruangan
+                    </label>
 
-                        <select name="pic_id"
-                                id="edit-room-pic-{{ $room->id }}">
+                    <select name="pic_id"
+                        id="edit-room-pic-{{ $room->id }}"
+                        required>
 
-                            <option value="">Belum ditentukan</option>
 
-                            @foreach ($picUsers as $pic)
-                                <option value="{{ $pic->id }}"
-                                    @selected(
-                                        (string) (
-                                            old('edit_room_id') == $room->id
-                                                ? old('pic_id', $room->pic_id)
-                                                : $room->pic_id
-                                        ) === (string) $pic->id
-                                    )>
 
-                                    {{ $pic->fullname
+                        @foreach ($picUsers as $pic)
+                        <option value="{{ $pic->id }}"
+                            @selected(
+                            (string) (
+                            old('edit_room_id')==$room->id
+                            ? old('pic_id', $room->pic_id)
+                            : $room->pic_id
+                            ) === (string) $pic->id
+                            )>
+
+                            {{ $pic->fullname
                                         ?? $pic->username
                                         ?? $pic->email }}
 
-                                </option>
-                            @endforeach
+                        </option>
+                        @endforeach
 
-                        </select>
-                    </div>
-
-                    <div class="rooms-form-group">
-                        <label for="edit-room-status-{{ $room->id }}">
-                            Status Ruangan <span>*</span>
-                        </label>
-
-                        <select name="is_active"
-                                id="edit-room-status-{{ $room->id }}"
-                                required>
-
-                            <option value="1"
-                                @selected(
-                                    (string) (
-                                        old('edit_room_id') == $room->id
-                                            ? old('is_active', $room->is_active)
-                                            : $room->is_active
-                                    ) === '1'
-                                )>
-                                Aktif
-                            </option>
-
-                            <option value="0"
-                                @selected(
-                                    (string) (
-                                        old('edit_room_id') == $room->id
-                                            ? old('is_active', $room->is_active)
-                                            : $room->is_active
-                                    ) === '0'
-                                )>
-                                Tidak Aktif
-                            </option>
-
-                        </select>
-                    </div>
-
+                    </select>
                 </div>
 
-                <div class="rooms-modal-footer">
-                    <button type="button"
-                            class="rooms-button rooms-button-secondary"
-                            data-rooms-close>
-                        Batal
-                    </button>
+                <div class="rooms-form-group">
+                    <label for="edit-room-status-{{ $room->id }}">
+                        Status Ruangan <span>*</span>
+                    </label>
 
-                    <button type="submit"
-                            class="rooms-button rooms-button-primary">
-                        Simpan Perubahan
-                    </button>
+                    <select name="is_active"
+                        id="edit-room-status-{{ $room->id }}"
+                        required>
+
+                        <option value="Aktif"
+                            @selected(
+                            (string) (
+                            old('edit_room_id')==$room->id
+                            ? old('is_active', $room->is_active)
+                            : $room->is_active
+                            ) === 'Aktif'
+                            )>
+                            Aktif
+                        </option>
+
+                        <option value="Nonaktif"
+                            @selected(
+                            (string) (
+                            old('edit_room_id')==$room->id
+                            ? old('is_active', $room->is_active)
+                            : $room->is_active
+                            ) === 'Nonaktif'
+                            )>
+                            Tidak Aktif
+                        </option>
+
+                    </select>
                 </div>
+
+            </div>
+
+            <div class="rooms-modal-footer">
+                <button type="button"
+                    class="rooms-button rooms-button-secondary"
+                    data-rooms-close>
+                    Batal
+                </button>
+
+                <button type="submit"
+                    class="rooms-button rooms-button-primary">
+                    Simpan Perubahan
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+
+{{-- ================================================== --}}
+{{-- MODAL KONFIRMASI HAPUS --}}
+{{-- ================================================== --}}
+
+<div class="rooms-modal"
+    id="rooms-delete-modal-{{ $room->id }}"
+    aria-hidden="true">
+
+    <div class="rooms-modal-dialog rooms-modal-dialog-small">
+
+        <div class="rooms-modal-header">
+            <div>
+                <h3>Hapus Ruangan</h3>
+                <p>Konfirmasi penghapusan data.</p>
+            </div>
+
+            <button type="button"
+                class="rooms-modal-close"
+                data-rooms-close
+                aria-label="Tutup">
+                &times;
+            </button>
+        </div>
+
+        <div class="rooms-modal-body">
+            <p class="rooms-delete-message">
+                Apakah kamu yakin ingin menghapus ruangan
+                <strong>{{ $room->room_name }}</strong>?
+            </p>
+
+            <p class="rooms-form-note">
+                Pastikan ruangan ini tidak sedang digunakan
+                oleh data peminjaman yang masih diperlukan.
+            </p>
+        </div>
+
+        <div class="rooms-modal-footer">
+
+            <button type="button"
+                class="rooms-button rooms-button-secondary"
+                data-rooms-close>
+                Batal
+            </button>
+
+            <form action="{{ route('rooms.destroy', $room->id) }}"
+                method="POST">
+
+                @csrf
+                @method('DELETE')
+
+                <button type="submit"
+                    class="rooms-button rooms-button-danger">
+                    Hapus Ruangan
+                </button>
 
             </form>
 
         </div>
+
     </div>
-
-
-    {{-- ================================================== --}}
-    {{-- MODAL KONFIRMASI HAPUS --}}
-    {{-- ================================================== --}}
-
-    <div class="rooms-modal"
-         id="rooms-delete-modal-{{ $room->id }}"
-         aria-hidden="true">
-
-        <div class="rooms-modal-dialog rooms-modal-dialog-small">
-
-            <div class="rooms-modal-header">
-                <div>
-                    <h3>Hapus Ruangan</h3>
-                    <p>Konfirmasi penghapusan data.</p>
-                </div>
-
-                <button type="button"
-                        class="rooms-modal-close"
-                        data-rooms-close
-                        aria-label="Tutup">
-                    &times;
-                </button>
-            </div>
-
-            <div class="rooms-modal-body">
-                <p class="rooms-delete-message">
-                    Apakah kamu yakin ingin menghapus ruangan
-                    <strong>{{ $room->room_name }}</strong>?
-                </p>
-
-                <p class="rooms-form-note">
-                    Pastikan ruangan ini tidak sedang digunakan
-                    oleh data peminjaman yang masih diperlukan.
-                </p>
-            </div>
-
-            <div class="rooms-modal-footer">
-
-                <button type="button"
-                        class="rooms-button rooms-button-secondary"
-                        data-rooms-close>
-                    Batal
-                </button>
-
-                <form action="{{ route('rooms.destroy', $room->id) }}"
-                      method="POST">
-
-                    @csrf
-                    @method('DELETE')
-
-                    <button type="submit"
-                            class="rooms-button rooms-button-danger">
-                        Hapus Ruangan
-                    </button>
-
-                </form>
-
-            </div>
-
-        </div>
-    </div>
+</div>
 
 @endforeach
 
@@ -1143,161 +1149,172 @@
 {{-- ====================================================== --}}
 
 <script>
-(function () {
-    /*
-     * Data ruangan dan data pengguna sama-sama berada
-     * di dashboard admin. Gunakan satu pengelola modal
-     * global agar event listener tidak bertumpuk.
-     */
+    (function() {
+        /*
+         * Data ruangan dan data pengguna sama-sama berada
+         * di dashboard admin. Gunakan satu pengelola modal
+         * global agar event listener tidak bertumpuk.
+         */
 
-    if (!window.rapiModalManagerInitialized) {
-        window.rapiModalManagerInitialized = true;
+        if (!window.rapiModalManagerInitialized) {
+            window.rapiModalManagerInitialized = true;
 
-        window.rapiOpenModal = function (modalId) {
-            const modal = document.getElementById(modalId);
+            window.rapiOpenModal = function(modalId) {
+                const modal = document.getElementById(modalId);
 
-            if (!modal) {
-                return;
-            }
+                if (!modal) {
+                    return;
+                }
 
-            document.querySelectorAll(
-                '.rooms-modal.is-open, .users-modal.is-open'
-            ).forEach(function (item) {
-                item.classList.remove('is-open');
-                item.setAttribute('aria-hidden', 'true');
-            });
-
-            modal.classList.add('is-open');
-            modal.setAttribute('aria-hidden', 'false');
-            document.body.style.overflow = 'hidden';
-
-            const firstInput = modal.querySelector(
-                'input:not([type="hidden"]), select'
-            );
-
-            if (firstInput) {
-                window.setTimeout(function () {
-                    firstInput.focus();
-                }, 100);
-            }
-        };
-
-        window.rapiCloseModal = function (modal) {
-            if (!modal) {
-                return;
-            }
-
-            modal.classList.remove('is-open');
-            modal.setAttribute('aria-hidden', 'true');
-
-            if (!document.querySelector(
-                '.rooms-modal.is-open, .users-modal.is-open'
-            )) {
-                document.body.style.overflow = '';
-            }
-        };
-
-        document.addEventListener('click', function (event) {
-            const openButton = event.target.closest(
-                '[data-rooms-open], [data-users-open]'
-            );
-
-            if (openButton) {
-                event.preventDefault();
-
-                const modalId =
-                    openButton.getAttribute('data-rooms-open') ||
-                    openButton.getAttribute('data-users-open');
-
-                window.rapiOpenModal(modalId);
-                return;
-            }
-
-            const closeButton = event.target.closest(
-                '[data-rooms-close], [data-users-close]'
-            );
-
-            if (closeButton) {
-                event.preventDefault();
-
-                window.rapiCloseModal(
-                    closeButton.closest('.rooms-modal, .users-modal')
-                );
-                return;
-            }
-
-            if (
-                event.target.classList.contains('rooms-modal') ||
-                event.target.classList.contains('users-modal')
-            ) {
-                window.rapiCloseModal(event.target);
-            }
-        });
-
-        document.addEventListener('keydown', function (event) {
-            if (event.key === 'Escape') {
-                const openedModal = document.querySelector(
+                document.querySelectorAll(
                     '.rooms-modal.is-open, .users-modal.is-open'
+                ).forEach(function(item) {
+                    item.classList.remove('is-open');
+                    item.setAttribute('aria-hidden', 'true');
+                });
+
+                modal.classList.add('is-open');
+                modal.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+
+                const firstInput = modal.querySelector(
+                    'input:not([type="hidden"]), select'
                 );
 
-                if (openedModal) {
-                    window.rapiCloseModal(openedModal);
+                if (firstInput) {
+                    window.setTimeout(function() {
+                        firstInput.focus();
+                    }, 100);
                 }
-            }
-        });
-    }
+            };
 
-    /*
-     * Pencarian ruangan.
-     */
-    const searchInput = document.getElementById('rooms-search-input');
+            window.rapiCloseModal = function(modal) {
+                if (!modal) {
+                    return;
+                }
 
-    if (searchInput && !searchInput.dataset.initialized) {
-        searchInput.dataset.initialized = 'true';
+                modal.classList.remove('is-open');
+                modal.setAttribute('aria-hidden', 'true');
 
-        searchInput.addEventListener('input', function () {
-            const keyword = this.value.toLowerCase().trim();
+                if (!document.querySelector(
+                        '.rooms-modal.is-open, .users-modal.is-open'
+                    )) {
+                    document.body.style.overflow = '';
+                }
+            };
 
-            const rows = document.querySelectorAll(
-                '#rooms-table-body .rooms-table-row'
-            );
+            document.addEventListener('click', function(event) {
+                const openButton = event.target.closest(
+                    '[data-rooms-open], [data-users-open]'
+                );
 
-            let visibleCount = 0;
+                if (openButton) {
+                    event.preventDefault();
 
-            rows.forEach(function (row) {
-                const matched = row.textContent
-                    .toLowerCase()
-                    .includes(keyword);
+                    const modalId =
+                        openButton.getAttribute('data-rooms-open') ||
+                        openButton.getAttribute('data-users-open');
 
-                row.style.display = matched ? '' : 'none';
+                    window.rapiOpenModal(modalId);
+                    return;
+                }
 
-                if (matched) {
-                    visibleCount++;
+                const closeButton = event.target.closest(
+                    '[data-rooms-close], [data-users-close]'
+                );
+
+                if (closeButton) {
+                    event.preventDefault();
+
+                    window.rapiCloseModal(
+                        closeButton.closest('.rooms-modal, .users-modal')
+                    );
+                    return;
+                }
+
+                if (
+                    event.target.classList.contains('rooms-modal') ||
+                    event.target.classList.contains('users-modal')
+                ) {
+                    window.rapiCloseModal(event.target);
                 }
             });
 
-            const noResult = document.getElementById(
-                'rooms-no-search-result'
-            );
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    const openedModal = document.querySelector(
+                        '.rooms-modal.is-open, .users-modal.is-open'
+                    );
 
-            if (noResult) {
-                noResult.style.display =
-                    rows.length > 0 && visibleCount === 0 ? '' : 'none';
-            }
-        });
+                    if (openedModal) {
+                        window.rapiCloseModal(openedModal);
+                    }
+                }
+            });
+        }
+
+        /*
+         * Pencarian ruangan.
+         */
+        const searchInput = document.getElementById('rooms-search-input');
+
+        if (searchInput && !searchInput.dataset.initialized) {
+            searchInput.dataset.initialized = 'true';
+
+            searchInput.addEventListener('input', function() {
+                const keyword = this.value.toLowerCase().trim();
+
+                const rows = document.querySelectorAll(
+                    '#rooms-table-body .rooms-table-row'
+                );
+
+                let visibleCount = 0;
+
+                rows.forEach(function(row) {
+                    const matched = row.textContent
+                        .toLowerCase()
+                        .includes(keyword);
+
+                    row.style.display = matched ? '' : 'none';
+
+                    if (matched) {
+                        visibleCount++;
+                    }
+                });
+
+                const noResult = document.getElementById(
+                    'rooms-no-search-result'
+                );
+
+                if (noResult) {
+                    noResult.style.display =
+                        rows.length > 0 && visibleCount === 0 ? '' : 'none';
+                }
+            });
+        }
+       /*
+ Buka kembali modal setelah validasi gagal.
+ */
+@php
+    $hasRoomErrors = $errors->hasAny([
+        'room_name',
+        'location',
+        'capacity',
+        'pic_id',
+        'is_active'
+    ]);
+@endphp
+
+const hasRoomErrors = @json($hasRoomErrors);
+const editRoomId = @json(old('edit_room_id'));
+
+if (hasRoomErrors) {
+    if (editRoomId) {
+        window.rapiOpenModal('rooms-edit-modal-' + editRoomId);
+    } else {
+        window.rapiOpenModal('rooms-add-modal');
     }
-
-    /*
-     * Buka kembali modal setelah validasi gagal.
-     */
-    @if ($errors->any())
-        @if (old('edit_room_id'))
-            window.rapiOpenModal(
-                'rooms-edit-modal-{{ old('edit_room_id') }}'
-            );
-        @else
-            window.rapiOpenModal('rooms-add-modal');
-        @endif
-    @endif
-})();
+}
+    })();
 </script>
+@endsection

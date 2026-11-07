@@ -16,12 +16,15 @@ class Event extends Model
         'room_id',
         'pic_id',
         'event_name',
+        'category',
+        'description',
         'date',
         'start_time',
         'end_time',
         'status',
         'approve_by',
         'move_reason',
+        'rejection_reason',
     ];
 
     public function room()

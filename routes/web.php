@@ -11,200 +11,119 @@ use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\ProfileController;
 
-// =====================================================
-// HALAMAN UTAMA
-// Kalender publik menjadi halaman pertama
-// =====================================================
+Route::get('/', fn () => redirect()->route('calendar'))->name('home');
 
-Route::get('/', function () {
-    return redirect()->route('calendar');
-})->name('home');
-
-// =====================================================
-// AUTENTIKASI
-// =====================================================
-
-Route::get('/login', [AuthController::class, 'showLoginForm'])
-    ->name('login');
-
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::post('/logout', [AuthController::class, 'logout'])
-    ->name('logout');
-
-// =====================================================
-// KALENDER PUBLIK
-// =====================================================
-
-Route::get('/calendar', [CalendarController::class, 'index'])
-    ->name('calendar');
-
-Route::get('/calendar/events', [CalendarController::class, 'events'])
-    ->name('calendar.events');
-
-// =====================================================
-// BOOKING DAN PENGADUAN
-// =====================================================
+Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar');
+Route::get('/calendar/events', [CalendarController::class, 'events'])->name('calendar.events');
 
 Route::middleware(['auth'])->group(function () {
 
-    // Form pengajuan peminjaman untuk Guru/Organisasi
+    // PROFIL
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+
+    // BOOKING DAN PENGADUAN
     Route::get('/booking', [EventsController::class, 'create'])
         ->middleware('role:3')
         ->name('booking.index');
 
-    // Menyimpan pengajuan peminjaman
     Route::post('/events', [EventsController::class, 'store'])
         ->middleware('role:3')
         ->name('events.store');
 
-    // Daftar pengaduan
+    Route::get('/complaints/from-booking/{id}', [ComplaintController::class, 'createFromBooking'])
+        ->name('complaints.fromBooking');
+
     Route::get('/complaints', [ComplaintController::class, 'index'])
         ->name('complaints.index');
 
-    // Menyimpan pengaduan
     Route::post('/complaints', [ComplaintController::class, 'store'])
         ->name('complaints.store');
 });
 
-// =====================================================
-// ADMIN / WAKA
-// =====================================================
-
+// ADMIN
 Route::middleware(['auth', 'role:1'])
     ->prefix('admin')
     ->group(function () {
 
-        // Dashboard Admin/Waka
         Route::get('/dashboard', [AdminController::class, 'index'])
             ->name('admin.dashboard');
 
-        // -------------------------------------------------
         // PERSETUJUAN PEMINJAMAN
-        // -------------------------------------------------
+        Route::get('/persetujuan-peminjaman', [AdminController::class, 'manageApprovals'])
+            ->name('admin.approvals.index');
 
-        // Menyetujui pengajuan
-        Route::put('/events/{id}/approve', [
-            EventsController::class,
-            'approve'
-        ])->name('admin.events.approve');
+        Route::put('/events/{id}/approve', [EventsController::class, 'approve'])
+            ->name('admin.events.approve');
 
-        // Menolak pengajuan
-        Route::put('/events/{id}/reject', [
-            EventsController::class,
-            'reject'
-        ])->name('admin.events.reject');
+        Route::put('/events/{id}/reject', [EventsController::class, 'reject'])
+            ->name('admin.events.reject');
 
-        // -------------------------------------------------
         // PEMINDAHAN RUANGAN
-        // -------------------------------------------------
+        Route::get('/pemindahan-ruang', [EventsController::class, 'manageOverride'])
+            ->name('admin.events.manage');
 
-        // Menampilkan agenda untuk pengelolaan pemindahan
-        Route::get('/pemindahan-ruang', [
-            EventsController::class,
-            'manageOverride'
-        ])->name('admin.events.manage');
+        Route::get('/events/{id}/move', [EventsController::class, 'moveForm'])
+            ->name('admin.events.move.form');
 
-        // Form pemindahan ruangan
-        Route::get('/events/{id}/move', [
-            EventsController::class,
-            'moveForm'
-        ])->name('admin.events.move.form');
+        Route::put('/events/{id}/override', [EventsController::class, 'overrideRoom'])
+            ->name('admin.events.override');
 
-        // Menyimpan perubahan ruangan
-        Route::put('/events/{id}/override', [
-            EventsController::class,
-            'overrideRoom'
-        ])->name('admin.events.override');
-
-        // -------------------------------------------------
         // PENGADUAN
-        // -------------------------------------------------
+        Route::get('/complaints/{id}/warn', [ComplaintController::class, 'sendWaWarning'])
+            ->name('admin.complaints.warn');
 
-        // Mengirim peringatan WhatsApp
-        Route::get('/complaints/{id}/warn', [
-            ComplaintController::class,
-            'sendWaWarning'
-        ])->name('admin.complaints.warn');
+        // DATA RUANGAN
+        Route::get('/rooms', [AdminController::class, 'manageRooms'])
+            ->name('admin.rooms.index');
 
-        // -------------------------------------------------
-        // KELOLA RUANGAN
-        // -------------------------------------------------
+        Route::post('/rooms', [RoomController::class, 'store'])
+            ->name('rooms.store');
 
-        Route::get('/rooms', [
-            AdminController::class,
-            'manageRooms'
-        ])->name('admin.rooms.index');
+        Route::put('/rooms/{id}', [RoomController::class, 'update'])
+            ->name('rooms.update');
 
-        Route::post('/rooms', [
-            RoomController::class,
-            'store'
-        ])->name('rooms.store');
+        Route::delete('/rooms/{id}', [RoomController::class, 'destroy'])
+            ->name('rooms.destroy');
 
-        Route::put('/rooms/{id}', [
-            RoomController::class,
-            'update'
-        ])->name('rooms.update');
+        // DATA PENGGUNA
+        Route::get('/users', [UserController::class, 'index'])
+            ->name('admin.users.index');
 
-        Route::delete('/rooms/{id}', [
-            RoomController::class,
-            'destroy'
-        ])->name('rooms.destroy');
+        Route::post('/users', [UserController::class, 'store'])
+            ->name('users.store');
 
-        // -------------------------------------------------
-        // KELOLA PENGGUNA
-        // -------------------------------------------------
+        Route::put('/users/{id}', [UserController::class, 'update'])
+            ->name('users.update');
 
-        Route::get('/users', [
-            UserController::class,
-            'index'
-        ])->name('admin.users.index');
-
-        Route::post('/users', [
-            UserController::class,
-            'store'
-        ])->name('users.store');
-
-        Route::put('/users/{id}', [
-            UserController::class,
-            'update'
-        ])->name('users.update');
-
-        Route::delete('/users/{id}', [
-            UserController::class,
-            'destroy'
-        ])->name('users.destroy');
+        Route::delete('/users/{id}', [UserController::class, 'destroy'])
+            ->name('users.destroy');
     });
 
-// =====================================================
-// PIC RUANGAN
-// =====================================================
-
+// PIC
 Route::middleware(['auth', 'role:2'])
     ->prefix('pic')
     ->group(function () {
 
-        // Dashboard PIC
         Route::get('/dashboard', [PicController::class, 'index'])
             ->name('pic.dashboard');
 
-        // Memperbarui status pengaduan
-        Route::put('/complaints/{id}/status', [
-            ComplaintController::class,
-            'updateStatus'
-        ])->name('pic.complaints.update');
+        Route::put('/complaints/{id}/status', [ComplaintController::class, 'updateStatus'])
+            ->name('pic.complaints.update');
     });
 
-// =====================================================
-// GURU / ORGANISASI
-// =====================================================
-
+// GURU
 Route::middleware(['auth', 'role:3'])
     ->prefix('guru')
     ->group(function () {
 
-        // Dashboard Guru/Organisasi
         Route::get('/dashboard', [GuruController::class, 'index'])
             ->name('guru.dashboard');
     });

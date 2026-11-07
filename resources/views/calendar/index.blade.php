@@ -8,13 +8,8 @@
 
     <title>Kalender Kegiatan | RAPI-Sekolah</title>
 
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        rel="stylesheet">
-
-    <link
-        href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css"
-        rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
 
     <style>
         :root {
@@ -242,6 +237,69 @@
             cursor: pointer;
         }
 
+        .fc .fc-day-sat .fc-daygrid-day-number,
+        .fc .fc-day-sun .fc-daygrid-day-number,
+        .fc .fc-day-sat .fc-col-header-cell-cushion,
+        .fc .fc-day-sun .fc-col-header-cell-cushion {
+            color: #dc3545;
+        }
+
+        /* ACARA HARI INI */
+        .today-event {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .today-event:last-child {
+            border-bottom: none;
+        }
+
+        .today-event h6 {
+            color: var(--navy);
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .today-event p {
+            color: var(--muted);
+            font-size: 13px;
+            margin-bottom: 0;
+        }
+
+        .today-event-time {
+            color: var(--navy);
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .today-status {
+            display: inline-block;
+            font-size: 11px;
+            padding: 4px 9px;
+            border-radius: 20px;
+            margin-top: 7px;
+        }
+
+        .today-status.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .today-status.approved {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .today-empty {
+            text-align: center;
+            color: var(--muted);
+            padding: 25px 10px;
+        }
+
         .site-footer {
             text-align: center;
             padding: 24px 16px;
@@ -258,6 +316,7 @@
         .detail-value {
             font-weight: 600;
             overflow-wrap: anywhere;
+            white-space: pre-line;
         }
 
         .detail-item {
@@ -313,6 +372,14 @@
                 font-size: 12px;
             }
         }
+
+        @media (max-width: 576px) {
+            .today-event {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
     </style>
 </head>
 
@@ -320,10 +387,9 @@
 
     <!-- NAVBAR -->
     <nav class="navbar-custom">
-        <div class="container-fluid px-3 px-md-4 d-flex
-                    justify-content-between align-items-center gap-3">
+        <div class="container-fluid px-3 px-md-4 d-flex justify-content-between align-items-center gap-3">
 
-            <a href="{{ route('home') }}" class="brand">
+            <a href="{{ route('calendar') }}" class="brand">
                 <span class="brand-icon">R</span>
 
                 <span>
@@ -335,6 +401,7 @@
             <a href="{{ route('login') }}" class="btn-login">
                 Login
             </a>
+
         </div>
     </nav>
 
@@ -342,11 +409,9 @@
 
         <!-- HERO -->
         <section class="hero">
-            <div class="hero-decoration" aria-hidden="true">▦</div>
+            <div class="hero-decoration" aria-hidden="true">◆</div>
 
-            <span class="hero-label">
-                KALENDER PUBLIK
-            </span>
+            <span class="hero-label">KALENDER PUBLIK</span>
 
             <h1>Kalender Kegiatan Sekolah</h1>
 
@@ -354,6 +419,24 @@
                 Lihat jadwal kegiatan dan penggunaan ruangan sekolah
                 dalam satu kalender yang mudah diakses.
             </p>
+        </section>
+
+        <!-- ACARA HARI INI -->
+        <section class="section-card mb-4">
+
+            <div class="section-heading">
+                <h2>Acara Hari Ini</h2>
+                <p id="todayDate">Daftar kegiatan sekolah hari ini</p>
+            </div>
+
+            <div class="calendar-content">
+                <div id="todayEventsList">
+                    <div class="today-empty">
+                        Memuat kegiatan hari ini...
+                    </div>
+                </div>
+            </div>
+
         </section>
 
         <!-- KALENDER -->
@@ -369,23 +452,42 @@
             <div class="calendar-content">
 
                 <div class="legend">
+
                     <span class="legend-item">
-                        <span class="legend-dot"
-                              style="background:#198754"></span>
-                        Disetujui
+                        <span class="legend-dot" style="background:#2457a7"></span>
+                        Kegiatan Guru
                     </span>
 
                     <span class="legend-item">
-                        <span class="legend-dot"
-                              style="background:#d99a24"></span>
-                        Menunggu / status lainnya
+                        <span class="legend-dot" style="background:#198754"></span>
+                        Kegiatan Siswa
                     </span>
 
                     <span class="legend-item">
-                        <span class="legend-dot"
-                              style="background:#dc3545"></span>
-                        Ditolak
+                        <span class="legend-dot" style="background:#805ad5"></span>
+                        Kegiatan Organisasi
                     </span>
+
+                    <span class="legend-item">
+                        <span class="legend-dot" style="background:#0d9488"></span>
+                        Rapat
+                    </span>
+
+                    <span class="legend-item">
+                        <span class="legend-dot" style="background:#d97706"></span>
+                        Kegiatan Sekolah
+                    </span>
+
+                    <span class="legend-item">
+                        <span class="legend-dot" style="background:#64748b"></span>
+                        Lainnya
+                    </span>
+
+                    <span class="legend-item">
+                        <span class="legend-dot" style="background:#f0ad4e"></span>
+                        Menunggu Persetujuan
+                    </span>
+
                 </div>
 
                 <div id="calendar"></div>
@@ -417,8 +519,8 @@
                 <div class="modal-header px-4 py-3">
                     <div>
                         <div class="detail-label">DETAIL AGENDA</div>
-                        <h5 class="modal-title fw-bold"
-                            id="eventModalLabel">
+
+                        <h5 class="modal-title fw-bold" id="eventModalLabel">
                             Informasi Kegiatan
                         </h5>
                     </div>
@@ -447,17 +549,14 @@
                     </div>
 
                     <div class="detail-item">
-                        <div class="detail-label">Waktu</div>
-                        <div id="detailTime" class="detail-value">-</div>
+                        <div class="detail-label">Nama Pengaju</div>
+                        <div id="detailApplicant" class="detail-value">-</div>
                     </div>
 
                     <div class="detail-item">
-                        <div class="detail-label">Status</div>
-                        <div>
-                            <span id="detailStatus"
-                                  class="badge text-bg-secondary">
-                                -
-                            </span>
+                        <div class="detail-label">Keterangan Kegiatan</div>
+                        <div id="detailDescription" class="detail-value">
+                            Tidak ada keterangan
                         </div>
                     </div>
 
@@ -476,24 +575,189 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+
             const calendarElement = document.getElementById('calendar');
             const errorElement = document.getElementById('calendarError');
+            const todayEventsList = document.getElementById('todayEventsList');
+            const todayDateElement = document.getElementById('todayDate');
 
             const modalElement = document.getElementById('eventModal');
             const eventModal = new bootstrap.Modal(modalElement);
 
+            const categoryColors = {
+                'Kegiatan Guru': '#2457a7',
+                'Kegiatan Siswa': '#198754',
+                'Kegiatan Organisasi': '#805ad5',
+                'Rapat': '#0d9488',
+                'Kegiatan Sekolah': '#d97706',
+                'Lainnya': '#64748b'
+            };
+
+            function getLocalDateString(date) {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+
+                return `${year}-${month}-${day}`;
+            }
+
+            function escapeHtml(value) {
+                return String(value ?? '').replace(/[&<>"']/g, function (char) {
+                    return {
+                        '&': '&amp;',
+                        '<': '&lt;',
+                        '>': '&gt;',
+                        '"': '&quot;',
+                        "'": '&#039;'
+                    }[char];
+                });
+            }
+
+            function renderTodayEvents(events) {
+                const now = new Date();
+                const today = getLocalDateString(now);
+
+                todayDateElement.textContent = now.toLocaleDateString('id-ID', {
+                    weekday: 'long',
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                });
+
+                // Hanya kegiatan sekolah yang masuk ke daftar Acara Hari Ini.
+                // Hari libur dan peringatan nasional tidak ikut ditampilkan di sini.
+                const todayEvents = events
+                    .filter(event =>
+                        event.extendedProps.date === today &&
+                        event.extendedProps.isNationalCalendar !== true
+                    )
+                    .sort((a, b) => {
+                        return (a.extendedProps.start_time || '').localeCompare(
+                            b.extendedProps.start_time || ''
+                        );
+                    });
+
+                if (todayEvents.length === 0) {
+                    todayEventsList.innerHTML = `
+                        <div class="today-empty">
+                            <div class="fw-bold mb-1">Tidak ada kegiatan hari ini</div>
+                            <div class="small">Belum terdapat agenda kegiatan sekolah yang tercatat.</div>
+                        </div>
+                    `;
+
+                    return;
+                }
+
+                todayEventsList.innerHTML = todayEvents.map(event => {
+                    const props = event.extendedProps;
+                    const status = String(props.status || '').toLowerCase();
+
+                    const isApproved = [
+                        'approved',
+                        'disetujui',
+                        'setuju'
+                    ].includes(status);
+
+                    const statusLabel = isApproved
+                        ? 'Disetujui'
+                        : 'Menunggu Persetujuan';
+
+                    const statusClass = isApproved
+                        ? 'approved'
+                        : 'pending';
+
+                    const color = isApproved
+                        ? (categoryColors[props.category] || '#64748b')
+                        : '#f0ad4e';
+
+                    return `
+                        <div class="today-event"
+                             role="button"
+                             tabindex="0"
+                             data-event-id="${escapeHtml(event.id)}">
+
+                            <div>
+                                <h6>${escapeHtml(event.title)}</h6>
+
+                                <p>
+                                    ${escapeHtml(props.room || 'Ruangan tidak diketahui')}
+                                    &nbsp;•&nbsp;
+                                    ${escapeHtml(props.applicant || 'Pengaju tidak diketahui')}
+                                </p>
+
+                                <span class="today-status ${statusClass}">
+                                    ${statusLabel}
+                                </span>
+                            </div>
+
+                            <div class="today-event-time" style="color:${color}">
+                                ${escapeHtml(props.start_time || '-')} - ${escapeHtml(props.end_time || '-')}
+                            </div>
+
+                        </div>
+                    `;
+                }).join('');
+
+                todayEventsList.querySelectorAll('.today-event').forEach(item => {
+                    const openEvent = function () {
+                        const selectedEvent = calendar.getEventById(item.dataset.eventId);
+
+                        if (selectedEvent) {
+                            showEventDetail(selectedEvent);
+                        }
+                    };
+
+                    item.addEventListener('click', openEvent);
+
+                    item.addEventListener('keydown', function (event) {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            openEvent();
+                        }
+                    });
+                });
+            }
+
+            function showEventDetail(event) {
+                const props = event.extendedProps;
+
+                document.getElementById('detailTitle').textContent =
+                    event.title || '-';
+
+                document.getElementById('detailRoom').textContent =
+                    props.room || '-';
+
+                document.getElementById('detailDate').textContent =
+                    props.date
+                        ? new Date(props.date + 'T00:00:00').toLocaleDateString('id-ID', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric'
+                        })
+                        : '-';
+
+                document.getElementById('detailApplicant').textContent =
+                    props.applicant || '-';
+
+                document.getElementById('detailDescription').textContent =
+                    props.description || 'Tidak ada keterangan';
+
+                eventModal.show();
+            }
+
             const calendar = new FullCalendar.Calendar(calendarElement, {
+
                 initialView: 'dayGridMonth',
                 locale: 'id',
                 firstDay: 1,
                 height: 'auto',
                 timeZone: 'local',
-                dayMaxEvents: true,
+
+                dayMaxEvents: 1,
 
                 headerToolbar: {
                     left: 'prev,next today',
@@ -514,50 +778,41 @@
 
                     failure: function () {
                         errorElement.classList.remove('d-none');
+
+                        todayEventsList.innerHTML = `
+                            <div class="today-empty">
+                                Gagal memuat kegiatan hari ini.
+                            </div>
+                        `;
+                    }
+                },
+
+                eventOrder: 'start',
+
+                eventDidMount: function (info) {
+                    const props = info.event.extendedProps;
+
+                    const isPending = String(props.status || '').toLowerCase() === 'pending';
+
+                    if (isPending) {
+                        info.el.style.borderLeft = '4px solid #d99a24';
                     }
                 },
 
                 eventClick: function (info) {
-                    const event = info.event;
-                    const props = event.extendedProps;
+                    const props = info.event.extendedProps;
 
-                    document.getElementById('detailTitle').textContent =
-                        event.title || '-';
-
-                    document.getElementById('detailRoom').textContent =
-                        props.room || '-';
-
-                    document.getElementById('detailDate').textContent =
-                        props.date || (
-                            event.start
-                                ? event.start.toLocaleDateString('id-ID')
-                                : '-'
-                        );
-
-                    document.getElementById('detailTime').textContent =
-                        (props.start_time || '-') + ' - ' +
-                        (props.end_time || '-');
-
-                    const status = props.status || 'Tidak diketahui';
-                    const statusElement =
-                        document.getElementById('detailStatus');
-
-                    statusElement.textContent = status;
-                    statusElement.className = 'badge';
-
-                    const normalizedStatus = status.toLowerCase();
-
-                    if (normalizedStatus.includes('setuju') ||
-                        normalizedStatus === 'approved') {
-                        statusElement.classList.add('text-bg-success');
-                    } else if (normalizedStatus.includes('tolak') ||
-                               normalizedStatus === 'rejected') {
-                        statusElement.classList.add('text-bg-danger');
-                    } else {
-                        statusElement.classList.add('text-bg-warning');
+                    // Hari libur dan peringatan nasional tidak membuka modal kegiatan.
+                    if (props.isNationalCalendar === true) {
+                        return;
                     }
 
-                    eventModal.show();
+                    // Kegiatan sekolah tetap membuka detail.
+                    showEventDetail(info.event);
+                },
+
+                eventsSet: function (events) {
+                    renderTodayEvents(events);
                 }
             });
 

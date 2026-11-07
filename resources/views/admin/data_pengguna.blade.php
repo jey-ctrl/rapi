@@ -1,3 +1,9 @@
+@extends('layouts.app')
+
+@section('title', 'Data Pengguna')
+@section('page-title', 'Data Pengguna')
+
+@section('content')
 {{-- resources/views/admin/data_pengguna.blade.php --}}
 
 <div class="users-page">
@@ -282,10 +288,11 @@
                     </label>
 
                     <input type="text"
-                           id="add-phone"
-                           name="phone_number"
-                           value="{{ old('phone_number') }}"
-                           placeholder="Contoh: 081234567890">
+       id="add-phone"
+       name="phone_number"
+       value="{{ old('phone_number') }}"
+       placeholder="Contoh: 081234567890"
+       required>
                 </div>
 
                 <div class="users-form-group">
@@ -430,11 +437,11 @@
                         <label for="edit-phone-{{ $user->id }}">
                             Nomor HP
                         </label>
-
                         <input type="text"
-                               id="edit-phone-{{ $user->id }}"
-                               name="phone_number"
-                               value="{{ old('edit_user_id') == $user->id ? old('phone_number') : $user->phone_number }}">
+       id="edit-phone-{{ $user->id }}"
+       name="phone_number"
+       value="{{ old('edit_user_id') == $user->id ? old('phone_number') : $user->phone_number }}"
+       required>
                     </div>
 
                     <div class="users-form-group">
@@ -1251,8 +1258,15 @@
         });
     }
 
-    // Jika validasi Laravel gagal, buka kembali modal yang sesuai.
-    @if ($errors->any())
+    // Buka kembali modal pengguna hanya jika validasi form pengguna gagal.
+    @if (
+        $errors->has('fullname') ||
+        $errors->has('username') ||
+        $errors->has('email') ||
+        $errors->has('phone_number') ||
+        $errors->has('role_id') ||
+        $errors->has('password')
+    )
         @if (old('edit_user_id'))
             openUsersModal('users-edit-modal-{{ old('edit_user_id') }}');
         @else
@@ -1261,3 +1275,4 @@
     @endif
 })();
 </script>
+@endsection

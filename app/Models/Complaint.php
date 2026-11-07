@@ -6,27 +6,30 @@ use Illuminate\Database\Eloquent\Model;
 
 class Complaint extends Model
 {
+    protected $table = 'complaints';
+
     protected $fillable = [
         'room_id',
         'reporter_id',
+        'event_id',
         'description',
         'photo_path',
         'status_repair',
-        'handler_id',
-        'reported_at'
+        'reported_at',
     ];
 
-    
     public function room()
     {
         return $this->belongsTo(Room::class, 'room_id');
     }
+
     public function reporter()
     {
         return $this->belongsTo(User::class, 'reporter_id');
     }
-    public function handler()
+
+    public function event()
     {
-        return $this->belongsTo(User::class, 'handler_id');
+        return $this->belongsTo(Event::class, 'event_id', 'events_id');
     }
 }

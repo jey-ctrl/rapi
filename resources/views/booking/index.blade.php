@@ -390,6 +390,10 @@
             border-color: var(--navy);
         }
 
+        .form-group select option:disabled {
+            color: #9aa3ae;
+        }
+
         .required-note {
             margin-top: 5px;
             color: var(--muted);
@@ -882,38 +886,81 @@
 
                         </div>
 
-                        <!-- WAKTU MULAI -->
+                        <!-- PILIH SESI MULAI -->
                         <div class="form-group">
 
-                            <label for="start_time">
-                                Waktu Mulai
+                            <label for="start_session">
+                                Sesi Mulai
                             </label>
 
-                            <input
-                                type="time"
-                                id="start_time"
-                                name="start_time"
-                                value="{{ old('start_time') }}"
-                                required
-                            >
+                            <select id="start_session" name="start_session" required>
+                                <option value="">-- Pilih Sesi Mulai --</option>
+                                @for ($session = 1; $session <= 10; $session++)
+                                    @php
+                                        $sessionStartMinutes = (7 * 60) + (($session - 1) * 90);
+                                        $sessionEndMinutes = $sessionStartMinutes + 90;
+                                        $sessionStartLabel = sprintf('%02d.%02d', intdiv($sessionStartMinutes, 60), $sessionStartMinutes % 60);
+                                        $sessionEndLabel = sprintf('%02d.%02d', intdiv($sessionEndMinutes, 60), $sessionEndMinutes % 60);
+                                    @endphp
+                                    @php
+                                        $bookingDate = old('date', now()->format('Y-m-d'));
+                                        $sessionStartDateTime = \Carbon\Carbon::createFromFormat(
+                                            'Y-m-d H:i',
+                                            $bookingDate . ' ' . sprintf('%02d:%02d', intdiv($sessionStartMinutes, 60), $sessionStartMinutes % 60),
+                                            config('app.timezone')
+                                        );
+                                        $sessionUnavailableToday = $bookingDate === now()->format('Y-m-d')
+                                            && $sessionStartDateTime->lt(now()->copy()->addHours(3));
+                                    @endphp
+                                    <option
+                                        value="{{ $session }}"
+                                        {{ $sessionUnavailableToday ? 'disabled' : '' }}
+                                        {{ (string) old('start_session') === (string) $session && !$sessionUnavailableToday ? 'selected' : '' }}
+                                    >
+                                        Sesi {{ $session }} ({{ $sessionStartLabel }}–{{ $sessionEndLabel }})
+                                    </option>
+                                @endfor
+                            </select>
+
+                            <p class="required-note">
+                                Untuk peminjaman hari ini, sesi hanya dapat dipilih minimal 3 jam sebelum waktu mulai.
+                            </p>
 
                         </div>
 
-                        <!-- WAKTU SELESAI -->
+                        <!-- PILIH SESI SELESAI -->
                         <div class="form-group">
 
-                            <label for="end_time">
-                                Waktu Selesai
+                            <label for="end_session">
+                                Sesi Selesai
                             </label>
 
-                            <input
-                                type="time"
-                                id="end_time"
-                                name="end_time"
-                                value="{{ old('end_time') }}"
-                                required
-                            >
+                            <select id="end_session" name="end_session" required>
+                                <option value="">-- Pilih Sesi Selesai --</option>
+                                @for ($session = 1; $session <= 10; $session++)
+                                    @php
+                                        $sessionStartMinutes = (7 * 60) + (($session - 1) * 90);
+                                        $sessionEndMinutes = $sessionStartMinutes + 90;
+                                        $sessionStartLabel = sprintf('%02d.%02d', intdiv($sessionStartMinutes, 60), $sessionStartMinutes % 60);
+                                        $sessionEndLabel = sprintf('%02d.%02d', intdiv($sessionEndMinutes, 60), $sessionEndMinutes % 60);
+                                    @endphp
+                                    <option
+                                        value="{{ $session }}"
+                                        {{ (string) old('end_session') === (string) $session ? 'selected' : '' }}
+                                    >
+                                        Sesi {{ $session }} ({{ $sessionStartLabel }}–{{ $sessionEndLabel }})
+                                    </option>
+                                @endfor
+                            </select>
 
+                        </div>
+
+                        <!-- PREVIEW WAKTU -->
+                        <div class="form-group">
+                            <label>Rentang Waktu Peminjaman</label>
+                            <div class="user-info" id="session_preview" aria-live="polite">
+                                Pilih sesi mulai dan sesi selesai untuk melihat rentang waktu.
+                            </div>
                         </div>
 
                         <!-- TOMBOL KIRIM -->
@@ -974,6 +1021,144 @@
                 month: 'long',
                 year: 'numeric'
             }).format(new Date());
+        }
+
+        // PILIHAN SESI DAN ATURAN MINIMAL 3 JAM
+        const dateInput = document.getElementById('date');
+        const startSession = document.getElementById('start_session');
+        const endSession = document.getElementById('end_session');
+        const sessionPreview = document.getElementById('session_preview');
+
+        const sessionTimes = {
+            1: { start: '07:00', end: '08:30' },
+            2: { start: '08:30', end: '10:00' },
+            3: { start: '10:00', end: '11:30' },
+            4: { start: '11:30', end: '13:00' },
+            5: { start: '13:00', end: '14:30' },
+            6: { start: '14:30', end: '16:00' },
+            7: { start: '16:00', end: '17:30' },
+            8: { start: '17:30', end: '19:00' },
+            9: { start: '19:00', end: '20:30' },
+            10: { start: '20:30', end: '22:00' }
+        };
+
+        function formatTime(time) {
+            return time.replace(':', '.');
+        }
+
+        // Waktu acuan berasal dari server Laravel agar mengikuti timezone aplikasi.
+        const appToday = @json(now()->format('Y-m-d'));
+        const serverNowTimestamp = {{ now()->timestamp * 1000 }};
+        const browserTimestampAtLoad = Date.now();
+
+        function getCurrentServerTime() {
+            return new Date(
+                serverNowTimestamp + (Date.now() - browserTimestampAtLoad)
+            );
+        }
+
+        function getLocalDateString(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return year + '-' + month + '-' + day;
+        }
+
+        function updateSessionOptions() {
+            if (!dateInput || !startSession || !endSession) return;
+
+            const selectedDate = dateInput.value;
+            const currentServerTime = getCurrentServerTime();
+            const isToday = selectedDate === appToday;
+
+            // Ambang batas: waktu mulai sesi harus >= sekarang + 3 jam.
+            const minimumStartTimestamp = currentServerTime.getTime() + (3 * 60 * 60 * 1000);
+
+            Array.from(startSession.options).forEach(function (option) {
+                if (!option.value) return;
+
+                const session = sessionTimes[option.value];
+                let unavailable = false;
+
+                if (isToday) {
+                    const sessionStartParts = session.start.split(':');
+                    const sessionStart = new Date(currentServerTime);
+                    sessionStart.setHours(
+                        parseInt(sessionStartParts[0], 10),
+                        parseInt(sessionStartParts[1], 10),
+                        0,
+                        0
+                    );
+
+                    unavailable = sessionStart.getTime() < minimumStartTimestamp;
+                }
+
+                option.disabled = unavailable;
+            });
+
+            const selectedStartOption = startSession.options[startSession.selectedIndex];
+            if (selectedStartOption && selectedStartOption.value && selectedStartOption.disabled) {
+                startSession.value = '';
+            }
+
+            updateEndSessionOptions();
+            updateSessionPreview();
+        }
+
+        function updateEndSessionOptions() {
+            if (!startSession || !endSession) return;
+
+            const selectedStart = parseInt(startSession.value, 10);
+
+            Array.from(endSession.options).forEach(function (option) {
+                if (!option.value) return;
+
+                const sessionNumber = parseInt(option.value, 10);
+                option.disabled = !selectedStart || sessionNumber < selectedStart;
+            });
+
+            const selectedEndOption = endSession.options[endSession.selectedIndex];
+            if (selectedEndOption && selectedEndOption.value && selectedEndOption.disabled) {
+                endSession.value = '';
+            }
+        }
+
+        function updateSessionPreview() {
+            if (!sessionPreview || !startSession || !endSession) return;
+
+            const startNumber = parseInt(startSession.value, 10);
+            const endNumber = parseInt(endSession.value, 10);
+
+            if (!startNumber || !endNumber || endNumber < startNumber) {
+                sessionPreview.textContent = 'Pilih sesi mulai dan sesi selesai untuk melihat rentang waktu.';
+                return;
+            }
+
+            const startTime = sessionTimes[startNumber].start;
+            const endTime = sessionTimes[endNumber].end;
+
+            sessionPreview.textContent =
+                'Peminjaman: ' + formatTime(startTime) + '–' + formatTime(endTime) +
+                ' (Sesi ' + startNumber + ' sampai Sesi ' + endNumber + ').';
+        }
+
+        if (dateInput && startSession && endSession) {
+            dateInput.addEventListener('change', function () {
+                // Ganti tanggal: pilihan sesi yang tersedia dihitung ulang.
+                updateSessionOptions();
+            });
+
+            startSession.addEventListener('change', function () {
+                updateEndSessionOptions();
+                updateSessionPreview();
+            });
+
+            endSession.addEventListener('change', updateSessionPreview);
+
+            updateSessionOptions();
+
+            // Perbarui pilihan setiap 30 detik jika halaman dibiarkan terbuka.
+            setInterval(updateSessionOptions, 30000);
         }
 
         // BUKA SIDEBAR

@@ -17,12 +17,21 @@ class User extends Authenticatable
         'fullname',
         'phone_number',
         'role_id',
+        'profile_photo',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'password' => 'hashed',
+            'role_id' => 'integer',
+        ];
+    }
 
     public function roles()
     {

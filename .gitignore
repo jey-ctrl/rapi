@@ -34,3 +34,7 @@ Thumbs.db
 /public/hot
 /storage/*.key
 /database/*.sqlite
+
+# Backup files
+*.bak
+resources/views/admin/dashboard_before_layout.blade.php
